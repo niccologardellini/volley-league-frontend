@@ -1,0 +1,64 @@
+<a class="skip-link" href="#contenuto">Salta al contenuto</a>
+<mat-sidenav-container class="container">
+  <mat-sidenav #drawer class="sidenav" [mode]="mobile() ? 'over' : 'side'" [opened]="!mobile()"
+               [attr.role]="'navigation'" aria-label="Menu principale">
+    <div class="brand">
+      <span class="logo" aria-hidden="true"><mat-icon>sports_volleyball</mat-icon></span>
+      <div>
+        <div class="brand-name">Volley League</div>
+        <div class="brand-sub">Gestione campionati FIPAV</div>
+      </div>
+    </div>
+
+    <mat-nav-list>
+      <div class="section-label">{{ etichettaRuolo() }}</div>
+      @for (v of vociRuolo(); track v.link) {
+        <a mat-list-item [routerLink]="v.link" routerLinkActive="active" #rla="routerLinkActive"
+           [attr.aria-current]="rla.isActive ? 'page' : null" (click)="mobile() && drawer.close()">
+          <mat-icon matListItemIcon>{{ v.icona }}</mat-icon>
+          <span matListItemTitle>{{ v.etichetta }}</span>
+        </a>
+      }
+      <div class="section-label">Campionato</div>
+      @for (v of vociComuni; track v.link) {
+        <a mat-list-item [routerLink]="v.link" routerLinkActive="active" #rla2="routerLinkActive"
+           [attr.aria-current]="rla2.isActive ? 'page' : null" (click)="mobile() && drawer.close()">
+          <mat-icon matListItemIcon>{{ v.icona }}</mat-icon>
+          <span matListItemTitle>{{ v.etichetta }}</span>
+        </a>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar class="toolbar">
+      @if (mobile()) {
+        <button mat-icon-button (click)="drawer.toggle()" aria-label="Apri menu">
+          <mat-icon>menu</mat-icon>
+        </button>
+      }
+      <span class="spacer"></span>
+      @if (auth.utente(); as u) {
+        <button mat-button class="user-btn" [matMenuTriggerFor]="menuUtente" aria-label="Menu utente">
+          <span class="avatar" aria-hidden="true">{{ iniziali() }}</span>
+          <span class="user-text">
+            <span class="user-name">{{ u.nome }} {{ u.cognome }}</span>
+            <span class="user-role">{{ etichettaRuolo() }}@if (u.nomeSocieta) { · {{ u.nomeSocieta }} }</span>
+          </span>
+          <mat-icon iconPositionEnd>expand_more</mat-icon>
+        </button>
+        <mat-menu #menuUtente="matMenu" xPosition="before">
+          <div class="menu-email" mat-menu-item disabled>{{ u.email }}</div>
+          <button mat-menu-item (click)="auth.logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Esci</span>
+          </button>
+        </mat-menu>
+      }
+    </mat-toolbar>
+
+    <main id="contenuto" class="content" tabindex="-1">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,68 @@
+@if (errore()) {
+  <app-stato-vuoto [errore]="true" titolo="Area personale non disponibile" [testo]="errore()!" />
+} @else if (!area()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Caricamento" />
+} @else {
+  @let a = area()!;
+  <header class="page-header hero">
+    <div class="who">
+      <div class="maglia" aria-hidden="true">{{ a.atleta.numeroMaglia }}</div>
+      <div>
+        <h1>{{ a.atleta.nome }} {{ a.atleta.cognome }}</h1>
+        <p><span class="ruolo">{{ a.atleta.ruoloCampo.toLowerCase() }}</span> · {{ a.squadra.nome }} · {{ a.campionato ?? 'nessun campionato' }}</p>
+      </div>
+    </div>
+  </header>
+
+  <section class="grid grid-4 kpis" aria-label="Statistiche stagionali">
+    <div class="card kpi"><mat-icon aria-hidden="true">event_available</mat-icon><span class="v">{{ a.totali.presenze }}</span><span class="l">presenze su {{ a.totali.convocazioni }} convocazioni</span></div>
+    <div class="card kpi"><mat-icon aria-hidden="true">sports_volleyball</mat-icon><span class="v">{{ a.totali.punti }}</span><span class="l">punti totali · {{ a.totali.mediaPunti }} a gara</span></div>
+    <div class="card kpi"><mat-icon aria-hidden="true">bolt</mat-icon><span class="v">{{ a.totali.ace }}</span><span class="l">ace</span></div>
+    <div class="card kpi"><mat-icon aria-hidden="true">back_hand</mat-icon><span class="v">{{ a.totali.muri }}</span><span class="l">muri vincenti</span></div>
+    <div class="card kpi"><mat-icon aria-hidden="true">report</mat-icon><span class="v">{{ a.totali.errori }}</span><span class="l">errori</span></div>
+  </section>
+
+  <div class="grid colonne">
+    <section class="card">
+      <h2>Andamento punti</h2>
+      @if (andamento().length) {
+        <div class="chart" role="img" [attr.aria-label]="etichettaGrafico()">
+          @for (g of andamento(); track g.idPartita) {
+            <div class="bar-col">
+              <span class="bar-v">{{ g.puntiFatti }}</span>
+              <div class="bar" [style.height.%]="g.perc"></div>
+              <span class="bar-l">{{ g.avversario.split(' ')[0] }}</span>
+            </div>
+          }
+        </div>
+      } @else { <p class="muted">Nessuna gara omologata con presenza in campo.</p> }
+
+      <h2 class="mt">Storico presenze</h2>
+      <div class="table-scroll">
+        <table class="tab">
+          <thead><tr><th scope="col">Data</th><th scope="col">Avversaria</th><th scope="col">Esito</th><th scope="col" class="num">Pt</th><th scope="col" class="num">Ace</th><th scope="col" class="num">Muri</th><th scope="col" class="num">Err</th></tr></thead>
+          <tbody>
+            @for (s of a.storico; track s.idPartita) {
+              <tr>
+                <td>{{ s.dataOra | date: 'd MMM' }}</td>
+                <td>{{ s.inCasa ? 'vs' : '@' }} {{ s.avversario }}</td>
+                <td>@if (s.risultato) { <span class="esito" [class.w]="s.risultato.startsWith('3')">{{ s.risultato }}</span> } <app-stato-chip [stato]="s.stato" /></td>
+                <td class="num">{{ s.puntiFatti ?? '—' }}</td><td class="num">{{ s.ace ?? '—' }}</td><td class="num">{{ s.muri ?? '—' }}</td><td class="num">{{ s.errori ?? '—' }}</td>
+              </tr>
+            } @empty { <tr><td colspan="7" class="muted">Non sei ancora stato convocato a referto.</td></tr> }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Prossime gare {{ a.squadra.nome }}</h2>
+      @for (p of prossime(); track p.id) {
+        <div class="prossima">
+          <div class="muted small">{{ p.giornata }}ª giornata · {{ p.dataOra | date: 'EEEE d MMMM, HH:mm' }}</div>
+          <app-punteggio [partita]="p" />
+        </div>
+      } @empty { <p class="muted">Nessuna gara in programma.</p> }
+    </section>
+  </div>
+}

@@ -1,0 +1,53 @@
+<header class="page-header">
+  <div>
+    <a mat-button routerLink="/dirigente/squadre"><mat-icon>arrow_back</mat-icon> Le mie squadre</a>
+    <h1>Rosa {{ squadra()?.nome }}</h1>
+    <p>{{ tesserati().length }} atleti tesserati · {{ squadra()?.nomeCampionato ?? 'non iscritta a campionati' }}</p>
+  </div>
+  <div class="actions">
+    <button mat-flat-button (click)="apri()"><mat-icon>person_add</mat-icon> Tessera atleta</button>
+  </div>
+</header>
+
+<div class="riepilogo" aria-label="Atleti per ruolo">
+  @for (r of perRuolo(); track r.ruolo) { <span class="chip-ruolo">{{ r.ruolo }}: {{ r.n }}</span> }
+</div>
+
+@if (caricamento()) { <mat-progress-bar mode="indeterminate" aria-label="Caricamento" /> }
+@if (errore()) {
+  <app-stato-vuoto [errore]="true" titolo="Impossibile caricare la rosa" [testo]="errore()!" />
+} @else if (!caricamento() && tesserati().length === 0) {
+  <app-stato-vuoto icona="badge" titolo="Rosa vuota" testo="Tessera almeno 6 atleti per poter iscrivere la squadra a un campionato.">
+    <button mat-flat-button (click)="apri()">Tessera atleta</button>
+  </app-stato-vuoto>
+} @else if (tesserati().length) {
+  <div class="table-wrap">
+    <table mat-table [dataSource]="tesserati()" aria-label="Rosa">
+      <ng-container matColumnDef="numero">
+        <th mat-header-cell *matHeaderCellDef>N°</th>
+        <td mat-cell *matCellDef="let t"><span class="maglia" [class.libero]="t.ruoloCampo === 'LIBERO'">{{ t.numeroMaglia }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="atleta">
+        <th mat-header-cell *matHeaderCellDef>Atleta</th>
+        <td mat-cell *matCellDef="let t"><strong>{{ t.cognome }}</strong> {{ t.nome }}</td>
+      </ng-container>
+      <ng-container matColumnDef="ruolo">
+        <th mat-header-cell *matHeaderCellDef>Ruolo</th>
+        <td mat-cell *matCellDef="let t" class="ruolo">{{ t.ruoloCampo.toLowerCase() }}</td>
+      </ng-container>
+      <ng-container matColumnDef="account">
+        <th mat-header-cell *matHeaderCellDef>Account</th>
+        <td mat-cell *matCellDef="let t" class="small">{{ t.emailAccount ?? '—' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="azioni">
+        <th mat-header-cell *matHeaderCellDef><span class="cdk-visually-hidden">Azioni</span></th>
+        <td mat-cell *matCellDef="let t">
+          <button mat-icon-button (click)="apri(t)" matTooltip="Modifica" [attr.aria-label]="'Modifica ' + t.nome + ' ' + t.cognome"><mat-icon>edit</mat-icon></button>
+          <button mat-icon-button (click)="svincola(t)" matTooltip="Svincola" [attr.aria-label]="'Svincola ' + t.nome + ' ' + t.cognome"><mat-icon>person_remove</mat-icon></button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="colonne"></tr>
+      <tr mat-row *matRowDef="let r; columns: colonne"></tr>
+    </table>
+  </div>
+}

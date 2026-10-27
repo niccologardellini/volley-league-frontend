@@ -1,0 +1,27 @@
+.who { display: flex; align-items: center; gap: 16px; }
+.maglia {
+  width: 64px; height: 64px; border-radius: 18px; display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--primario), #5b82f0); color: #fff; font-size: 1.8rem; font-weight: 800;
+}
+.ruolo { text-transform: capitalize; }
+.kpis { margin-bottom: 16px; }
+.kpi { display: flex; flex-direction: column; gap: 2px; }
+.kpi mat-icon { color: var(--accento); }
+.kpi .v { font-size: 2rem; font-weight: 800; color: var(--primario); }
+.kpi .l { color: var(--testo-sec); font-size: .82rem; }
+.colonne { grid-template-columns: 2fr 1fr; align-items: start; }
+.mt { margin-top: 22px !important; }
+.chart { display: flex; align-items: flex-end; gap: 14px; height: 170px; padding-top: 10px; }
+.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; max-width: 70px; }
+.bar { width: 100%; background: linear-gradient(180deg, var(--accento), #ff7a00); border-radius: 8px 8px 2px 2px; min-height: 4px; }
+.bar-v { font-weight: 700; font-size: .85rem; margin-bottom: 4px; }
+.bar-l { font-size: .72rem; color: var(--testo-sec); margin-top: 6px; }
+.table-scroll { overflow-x: auto; }
+.tab { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.tab th { text-align: left; font-size: .72rem; text-transform: uppercase; color: var(--testo-sec); padding: 6px; border-bottom: 1px solid var(--bordo); }
+.tab td { padding: 8px 6px; border-bottom: 1px solid var(--bordo); }
+.tab .num { text-align: right; font-variant-numeric: tabular-nums; }
+.esito { font-weight: 800; margin-right: 6px; color: #8c1d18; }
+.esito.w { color: #116336; }
+.prossima { padding: 10px 0; border-bottom: 1px solid var(--bordo); }
+@media (max-width: 900px) { .colonne { grid-template-columns: 1fr; } }

@@ -1,0 +1,59 @@
+<div class="login">
+  <section class="hero" aria-hidden="true">
+    <div class="hero-inner">
+      <div class="logo"><mat-icon>sports_volleyball</mat-icon></div>
+      <h2>Volley League</h2>
+      <p class="claim">Dal calendario al referto omologato, tutto il campionato in un'unica piattaforma.</p>
+      <ul>
+        <li><mat-icon>event</mat-icon> Calendari generati automaticamente</li>
+        <li><mat-icon>fact_check</mat-icon> Liste gara e referti digitali validati</li>
+        <li><mat-icon>leaderboard</mat-icon> Classifiche ufficiali con quozienti</li>
+      </ul>
+    </div>
+  </section>
+
+  <main class="pannello">
+    <form class="form" [formGroup]="form" (ngSubmit)="accedi()" novalidate>
+      <h1>Accedi</h1>
+      <p class="muted">Usa le credenziali del tuo profilo federale.</p>
+
+      @if (errore()) {
+        <div class="errori-box" role="alert">{{ errore() }}</div>
+      }
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" autocomplete="username" required>
+        <mat-icon matPrefix>mail</mat-icon>
+        @if (form.controls.email.hasError('email')) { <mat-error>Inserisci un indirizzo email valido</mat-error> }
+        @else if (form.controls.email.hasError('required')) { <mat-error>L'email è obbligatoria</mat-error> }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Password</mat-label>
+        <input matInput [type]="mostraPassword() ? 'text' : 'password'" formControlName="password" autocomplete="current-password" required>
+        <mat-icon matPrefix>lock</mat-icon>
+        <button mat-icon-button matSuffix type="button" (click)="mostraPassword.set(!mostraPassword())"
+                [attr.aria-label]="mostraPassword() ? 'Nascondi password' : 'Mostra password'">
+          <mat-icon>{{ mostraPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (form.controls.password.hasError('required')) { <mat-error>La password è obbligatoria</mat-error> }
+      </mat-form-field>
+
+      <button mat-flat-button class="full submit" type="submit" [disabled]="invio()">
+        @if (invio()) { <mat-spinner diameter="20" /> } @else { Entra }
+      </button>
+
+      <div class="demo">
+        <div class="demo-title">Account dimostrativi <span class="muted small">(password: <code>password</code>)</span></div>
+        <div class="demo-grid">
+          @for (d of demo; track d.email) {
+            <button mat-stroked-button type="button" (click)="usaDemo(d.email)" [attr.aria-label]="'Compila con account ' + d.ruolo">
+              <mat-icon>{{ d.icona }}</mat-icon> {{ d.ruolo }}
+            </button>
+          }
+        </div>
+      </div>
+    </form>
+  </main>
+</div>

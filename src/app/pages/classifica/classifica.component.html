@@ -1,0 +1,103 @@
+<header class="page-header">
+  <div>
+    <h1>Classifica</h1>
+    <p>Calcolata sulle sole gare omologate · 3 punti per 3-0/3-1, 2-1 per il tie-break</p>
+  </div>
+  <div class="actions">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sel">
+      <mat-label>Campionato</mat-label>
+      <mat-select [ngModel]="idCampionato()" (ngModelChange)="seleziona($event)">
+        @for (c of campionati(); track c.id) {
+          <mat-option [value]="c.id">{{ c.nome }} · Girone {{ c.girone }} ({{ c.stagione }})</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+</header>
+
+<div class="toolbar-crit">
+  <span class="muted small" id="lbl-criterio">Ordina per</span>
+  <mat-button-toggle-group [value]="criterio()" (change)="cambiaCriterio($event.value)" aria-labelledby="lbl-criterio" hideSingleSelectionIndicator>
+    <mat-button-toggle value="FIPAV" matTooltip="Punti, vittorie, quoziente set, quoziente punti">Regolamento FIPAV</mat-button-toggle>
+    <mat-button-toggle value="VITTORIE" matTooltip="Numero di vittorie, poi punti">Vittorie</mat-button-toggle>
+    <mat-button-toggle value="QUOZIENTE_SET" matTooltip="Quoziente set, poi quoziente punti">Quoziente set</mat-button-toggle>
+  </mat-button-toggle-group>
+</div>
+
+@if (caricamento()) { <mat-progress-bar mode="indeterminate" aria-label="Caricamento classifica" /> }
+
+@if (errore()) {
+  <app-stato-vuoto [errore]="true" titolo="Impossibile caricare la classifica" [testo]="errore()!" />
+} @else if (!caricamento() && righe().length === 0) {
+  <app-stato-vuoto icona="leaderboard" titolo="Nessuna squadra iscritta"
+                   testo="La classifica comparirà quando le squadre si saranno iscritte al campionato." />
+} @else if (righe().length) {
+  @if (campionatoCorrente()?.stato === 'ISCRIZIONI_APERTE') {
+    <div class="info-box">Iscrizioni ancora aperte: il calendario non è stato generato.</div>
+  }
+  <div class="table-wrap">
+    <table mat-table [dataSource]="righe()" aria-label="Classifica del campionato">
+      <ng-container matColumnDef="posizione">
+        <th mat-header-cell *matHeaderCellDef>#</th>
+        <td mat-cell *matCellDef="let r"><span class="pos" [class.top]="r.posizione <= 2">{{ r.posizione }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="squadra">
+        <th mat-header-cell *matHeaderCellDef>Squadra</th>
+        <td mat-cell *matCellDef="let r"><div class="sq">{{ r.squadra }}</div><div class="muted small">{{ r.societa }}</div></td>
+      </ng-container>
+      <ng-container matColumnDef="punti">
+        <th mat-header-cell *matHeaderCellDef class="num"><abbr title="Punti">Pt</abbr></th>
+        <td mat-cell *matCellDef="let r" class="num pt">{{ r.punti }}</td>
+      </ng-container>
+      <ng-container matColumnDef="giocate">
+        <th mat-header-cell *matHeaderCellDef class="num"><abbr title="Gare giocate">G</abbr></th>
+        <td mat-cell *matCellDef="let r" class="num">{{ r.giocate }}</td>
+      </ng-container>
+      <ng-container matColumnDef="vinte">
+        <th mat-header-cell *matHeaderCellDef class="num"><abbr title="Vinte">V</abbr></th>
+        <td mat-cell *matCellDef="let r" class="num">{{ r.vinte }}</td>
+      </ng-container>
+      <ng-container matColumnDef="perse">
+        <th mat-header-cell *matHeaderCellDef class="num"><abbr title="Perse">P</abbr></th>
+        <td mat-cell *matCellDef="let r" class="num">{{ r.perse }}</td>
+      </ng-container>
+      <ng-container matColumnDef="setVinti">
+        <th mat-header-cell *matHeaderCellDef class="num"><abbr title="Set vinti">SV</abbr></th>
+        <td mat-cell *matCellDef="let r" class="num">{{ r.setVinti }}</td>
+      </ng-container>
+      <ng-container matColumnDef="setPersi">
+        <th mat-header-cell *matHeaderCellDef class="num"><abbr title="Set persi">SP</abbr></th>
+        <td mat-cell *matCellDef="let r" class="num">{{ r.setPersi }}</td>
+      </ng-container>
+      <ng-container matColumnDef="quozienteSet">
+        <th mat-header-cell *matHeaderCellDef class="num"><abbr title="Quoziente set (vinti / persi)">QS</abbr></th>
+        <td mat-cell *matCellDef="let r" class="num">{{ r.quozienteSet === null ? 'MAX' : (r.quozienteSet | number: '1.3-3') }}</td>
+      </ng-container>
+      <ng-container matColumnDef="puntiFatti">
+        <th mat-header-cell *matHeaderCellDef class="num"><abbr title="Punti fatti">PF</abbr></th>
+        <td mat-cell *matCellDef="let r" class="num">{{ r.puntiFatti }}</td>
+      </ng-container>
+      <ng-container matColumnDef="puntiSubiti">
+        <th mat-header-cell *matHeaderCellDef class="num"><abbr title="Punti subiti">PS</abbr></th>
+        <td mat-cell *matCellDef="let r" class="num">{{ r.puntiSubiti }}</td>
+      </ng-container>
+      <ng-container matColumnDef="quozientePunti">
+        <th mat-header-cell *matHeaderCellDef class="num"><abbr title="Quoziente punti (fatti / subiti)">QP</abbr></th>
+        <td mat-cell *matCellDef="let r" class="num">{{ r.quozientePunti === null ? 'MAX' : (r.quozientePunti | number: '1.3-3') }}</td>
+      </ng-container>
+      <ng-container matColumnDef="risultati">
+        <th mat-header-cell *matHeaderCellDef>Risultati</th>
+        <td mat-cell *matCellDef="let r">
+          <div class="ris">
+            @for (n of r.risultati; track $index) {
+              <span [matTooltip]="etichetteRisultati[$index]" [class.vinto]="$index < 3" [attr.aria-label]="n + ' risultati ' + etichetteRisultati[$index]">{{ n }}</span>
+            }
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="colonne"></tr>
+      <tr mat-row *matRowDef="let r; columns: colonne" [class.mia]="r.societa === miaSocieta()"></tr>
+    </table>
+  </div>
+  <p class="muted small legenda">Risultati nell'ordine 3-0 · 3-1 · 3-2 · 2-3 · 1-3 · 0-3. A parità di punti decidono vittorie, quoziente set e quoziente punti.</p>
+}

@@ -1,0 +1,6 @@
+.giornata h2 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; text-transform: none; }
+.giornata h2 .small { text-transform: capitalize; font-weight: 400; }
+.partita { padding: 12px 0; border-top: 1px solid var(--bordo); }
+.partita:first-of-type { border-top: none; }
+.meta { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+.meta mat-icon { vertical-align: -2px; }

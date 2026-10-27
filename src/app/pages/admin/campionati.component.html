@@ -1,0 +1,62 @@
+<header class="page-header">
+  <div>
+    <h1>Campionati</h1>
+    <p>Crea i gironi, controlla le iscrizioni e genera il calendario</p>
+  </div>
+  <div class="actions">
+    <button mat-flat-button (click)="nuovo()"><mat-icon>add</mat-icon> Nuovo campionato</button>
+  </div>
+</header>
+
+@if (caricamento()) { <mat-progress-bar mode="indeterminate" aria-label="Caricamento" /> }
+@if (errore()) {
+  <app-stato-vuoto [errore]="true" titolo="Impossibile caricare i campionati" [testo]="errore()!">
+    <button mat-stroked-button (click)="carica()">Riprova</button>
+  </app-stato-vuoto>
+} @else if (!caricamento() && campionati().length === 0) {
+  <app-stato-vuoto icona="emoji_events" titolo="Nessun campionato" testo="Crea il primo campionato per aprire le iscrizioni.">
+    <button mat-flat-button (click)="nuovo()">Nuovo campionato</button>
+  </app-stato-vuoto>
+} @else {
+  <div class="grid grid-2">
+    @for (c of campionati(); track c.id) {
+      <article class="card camp">
+        <div class="top">
+          <div>
+            <div class="muted small">{{ c.categoria }} · {{ c.stagione }}</div>
+            <h2>{{ c.nome }} <span class="girone">Girone {{ c.girone }}</span></h2>
+          </div>
+          <span class="badge" [class]="'badge badge-' + c.stato.toLowerCase()">{{ etichette[c.stato] }}</span>
+        </div>
+        <div class="kpi">
+          <div><span class="v">{{ c.numeroSquadre }}</span><span class="l">squadre</span></div>
+          <div><span class="v">{{ c.numeroPartite }}</span><span class="l">partite</span></div>
+        </div>
+
+        <mat-accordion>
+          <mat-expansion-panel (opened)="caricaSquadre(c.id)" class="mat-elevation-z0 pannello">
+            <mat-expansion-panel-header><mat-panel-title>Squadre iscritte</mat-panel-title></mat-expansion-panel-header>
+            @if (squadre()[c.id]; as lista) {
+              <ul class="squadre">
+                @for (s of lista; track s.id) {
+                  <li><strong>{{ s.nome }}</strong> <span class="muted small">{{ s.nomeSocieta }} · {{ s.citta }} ({{ s.provincia }}) · {{ s.numeroTesserati }} tesserati</span></li>
+                } @empty { <li class="muted">Nessuna squadra iscritta</li> }
+              </ul>
+            } @else { <mat-progress-bar mode="indeterminate" /> }
+          </mat-expansion-panel>
+        </mat-accordion>
+
+        <div class="azioni">
+          @if (c.stato === 'ISCRIZIONI_APERTE') {
+            <button mat-flat-button (click)="generaCalendario(c)" [disabled]="c.numeroSquadre < 2">
+              <mat-icon>auto_awesome</mat-icon> Genera calendario
+            </button>
+          } @else {
+            <a mat-stroked-button routerLink="/calendario" [queryParams]="{ campionato: c.id }"><mat-icon>calendar_month</mat-icon> Calendario</a>
+            <a mat-stroked-button routerLink="/classifica" [queryParams]="{ campionato: c.id }"><mat-icon>leaderboard</mat-icon> Classifica</a>
+          }
+        </div>
+      </article>
+    }
+  </div>
+}

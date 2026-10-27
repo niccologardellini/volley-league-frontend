@@ -1,0 +1,48 @@
+<header class="page-header">
+  <div>
+    <h1>Omologazione referti</h1>
+    <p>Verifica i referti firmati dagli arbitri: l'omologazione rende ufficiale il risultato in classifica</p>
+  </div>
+</header>
+
+@if (caricamento()) { <mat-progress-bar mode="indeterminate" aria-label="Caricamento" /> }
+
+@if (!caricamento() && partite().length === 0) {
+  <app-stato-vuoto icona="task_alt" titolo="Nessun referto in attesa" testo="Tutti i referti ricevuti sono stati revisionati." />
+} @else if (partite().length) {
+  <div class="layout">
+    <nav class="card elenco" aria-label="Referti da revisionare">
+      <h2>In attesa ({{ partite().length }})</h2>
+      @for (p of partite(); track p.id) {
+        <button class="voce" [class.attiva]="p.id === selezionata()?.id" (click)="apri(p)" [attr.aria-pressed]="p.id === selezionata()?.id">
+          <span class="g">{{ p.casa.nome }} – {{ p.ospite.nome }}</span>
+          <span class="muted small">{{ p.setCasa }}-{{ p.setOspite }} · {{ p.dataOra | date: 'd MMM' }} · {{ p.arbitro }}</span>
+        </button>
+      }
+    </nav>
+
+    <section class="card dettaglio" aria-live="polite">
+      @if (referto(); as r) {
+        <app-referto-view [referto]="r" />
+        @if (mostraRespingi()) {
+          <mat-form-field appearance="outline" class="full motivo">
+            <mat-label>Motivazione del respingimento</mat-label>
+            <textarea matInput rows="3" [(ngModel)]="motivazione" required maxlength="1000"
+                      placeholder="Es. il 3° set riporta un punteggio diverso dal referto cartaceo"></textarea>
+          </mat-form-field>
+        }
+        <div class="azioni">
+          @if (!mostraRespingi()) {
+            <button mat-stroked-button (click)="mostraRespingi.set(true)" [disabled]="invio()"><mat-icon>undo</mat-icon> Respingi</button>
+            <button mat-flat-button (click)="omologa()" [disabled]="invio()"><mat-icon>verified</mat-icon> Omologa risultato</button>
+          } @else {
+            <button mat-button (click)="mostraRespingi.set(false)">Annulla</button>
+            <button mat-flat-button class="danger" (click)="respingi()" [disabled]="invio() || !motivazione.trim()">Conferma respingimento</button>
+          }
+        </div>
+      } @else {
+        <mat-progress-bar mode="indeterminate" aria-label="Caricamento referto" />
+      }
+    </section>
+  </div>
+}

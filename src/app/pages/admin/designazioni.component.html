@@ -1,0 +1,51 @@
+<header class="page-header">
+  <div>
+    <h1>Designazioni arbitrali</h1>
+    <p>{{ daDesignare() }} gare in attesa di designazione</p>
+  </div>
+  <div class="actions">
+    <mat-slide-toggle [ngModel]="soloSenzaArbitro()" (ngModelChange)="soloSenzaArbitro.set($event)">Solo senza arbitro</mat-slide-toggle>
+  </div>
+</header>
+
+@if (caricamento()) { <mat-progress-bar mode="indeterminate" aria-label="Caricamento" /> }
+@if (errore()) {
+  <app-stato-vuoto [errore]="true" titolo="Impossibile caricare le gare" [testo]="errore()!" />
+} @else if (!caricamento() && visibili().length === 0) {
+  <app-stato-vuoto icona="task_alt" titolo="Nessuna gara da designare" testo="Tutte le gare in programma hanno un arbitro." />
+} @else if (visibili().length) {
+  <div class="table-wrap">
+    <table mat-table [dataSource]="visibili()" aria-label="Gare da designare">
+      <ng-container matColumnDef="data">
+        <th mat-header-cell *matHeaderCellDef>Data</th>
+        <td mat-cell *matCellDef="let p">{{ p.dataOra | date: 'EEE d MMM, HH:mm' }}<div class="muted small">{{ p.giornata }}ª giornata</div></td>
+      </ng-container>
+      <ng-container matColumnDef="gara">
+        <th mat-header-cell *matHeaderCellDef>Gara</th>
+        <td mat-cell *matCellDef="let p"><span class="sq">{{ p.casa.nome }}</span><span class="vs">–</span><span class="sq">{{ p.ospite.nome }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="campionato">
+        <th mat-header-cell *matHeaderCellDef>Campionato</th>
+        <td mat-cell *matCellDef="let p" class="small">{{ p.campionato }}</td>
+      </ng-container>
+      <ng-container matColumnDef="stato">
+        <th mat-header-cell *matHeaderCellDef>Stato</th>
+        <td mat-cell *matCellDef="let p"><app-stato-chip [stato]="p.stato" /></td>
+      </ng-container>
+      <ng-container matColumnDef="arbitro">
+        <th mat-header-cell *matHeaderCellDef>Arbitro</th>
+        <td mat-cell *matCellDef="let p">@if (p.arbitro) { {{ p.arbitro }} } @else { <span class="senza">Da designare</span> }</td>
+      </ng-container>
+      <ng-container matColumnDef="azioni">
+        <th mat-header-cell *matHeaderCellDef><span class="cdk-visually-hidden">Azioni</span></th>
+        <td mat-cell *matCellDef="let p">
+          <button mat-stroked-button (click)="designa(p)" [attr.aria-label]="'Designa arbitro per ' + p.casa.nome + ' contro ' + p.ospite.nome">
+            <mat-icon>sports</mat-icon> {{ p.arbitro ? 'Modifica' : 'Designa' }}
+          </button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="colonne"></tr>
+      <tr mat-row *matRowDef="let r; columns: colonne"></tr>
+    </table>
+  </div>
+}

@@ -1,0 +1,13 @@
+.camp .top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.camp h2 { margin: 2px 0 0; font-size: 1.2rem; }
+.girone { font-weight: 500; color: var(--testo-sec); font-size: .95rem; }
+.badge { padding: 4px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700; white-space: nowrap; }
+.badge-iscrizioni_aperte { background: #e3f0ff; color: #0b4f9c; }
+.badge-in_corso { background: #fff1d6; color: #8a5300; }
+.badge-concluso { background: #dcf5e6; color: #116336; }
+.kpi { display: flex; gap: 28px; margin: 14px 0; }
+.kpi .v { font-size: 1.6rem; font-weight: 800; display: block; color: var(--primario); }
+.kpi .l { font-size: .78rem; color: var(--testo-sec); }
+.pannello { border: 1px solid var(--bordo); border-radius: 12px !important; }
+.squadre { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.azioni { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }

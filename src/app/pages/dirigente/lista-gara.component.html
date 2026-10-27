@@ -1,0 +1,67 @@
+<header class="page-header">
+  <div>
+    <a mat-button [routerLink]="['/dirigente/partite', idSquadra()]"><mat-icon>arrow_back</mat-icon> Partite</a>
+    <h1>Lista gara</h1>
+    @if (partita(); as p) {
+      <p>{{ p.giornata }}ª giornata · <strong>{{ p.casa.nome }} – {{ p.ospite.nome }}</strong> · {{ p.dataOra | date: 'EEEE d MMMM, HH:mm' }}</p>
+    }
+  </div>
+</header>
+
+@if (!partita()) { <mat-progress-bar mode="indeterminate" aria-label="Caricamento" /> }
+@else {
+  @if (inviataAt()) {
+    <div class="info-box">Lista già inviata il {{ inviataAt() | date: 'd/MM/yyyy HH:mm' }}: puoi modificarla fino all'inizio della gara.</div>
+  }
+
+  <div class="layout">
+    <section class="card" aria-labelledby="titolo-atleti">
+      <h2 id="titolo-atleti">Atleti convocati</h2>
+      @for (g of gruppi(); track g.ruolo) {
+        <fieldset class="gruppo">
+          <legend>{{ g.ruolo }}</legend>
+          <div class="atleti">
+            @for (t of g.atleti; track t.id) {
+              <mat-checkbox [checked]="selezionati().has(t.id)" (change)="toggle(t.id, $event.checked)" class="atleta" [class.sel]="selezionati().has(t.id)">
+                <span class="n">{{ t.numeroMaglia }}</span> {{ t.cognome }} {{ t.nome }}
+              </mat-checkbox>
+            }
+          </div>
+        </fieldset>
+      }
+    </section>
+
+    <aside class="card riepilogo" aria-live="polite">
+      <h2>Riepilogo</h2>
+      <div class="contatori">
+        <div [class.ko]="numero() > max || numero() < 6"><span class="v">{{ numero() }}</span><span class="l">/ {{ max }} atleti</span></div>
+        <div [class.ko]="liberi() > maxLiberi"><span class="v">{{ liberi() }}</span><span class="l">/ {{ maxLiberi }} liberi</span></div>
+      </div>
+      @if (avvisi().length) {
+        <ul class="avvisi">@for (a of avvisi(); track a) { <li><mat-icon inline>warning</mat-icon> {{ a }}</li> }</ul>
+      } @else {
+        <p class="ok"><mat-icon inline>check_circle</mat-icon> Composizione regolare</p>
+      }
+
+      <h3>Staff</h3>
+      <mat-form-field appearance="outline" class="full"><mat-label>Allenatore</mat-label>
+        <input matInput [(ngModel)]="allenatore" required maxlength="120">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full"><mat-label>Vice allenatore</mat-label>
+        <input matInput [(ngModel)]="viceAllenatore" maxlength="120">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full"><mat-label>Dirigente accompagnatore</mat-label>
+        <input matInput [(ngModel)]="dirigente" maxlength="120">
+      </mat-form-field>
+
+      @if (erroriServer().length) {
+        <div class="errori-box" role="alert"><strong>Lista respinta dal server</strong>
+          <ul>@for (e of erroriServer(); track e) { <li>{{ e }}</li> }</ul></div>
+      }
+
+      <button mat-flat-button class="full" (click)="invia()" [disabled]="invio() || avvisi().length > 0 || !allenatore.trim()">
+        <mat-icon>send</mat-icon> Invia lista gara
+      </button>
+    </aside>
+  </div>
+}

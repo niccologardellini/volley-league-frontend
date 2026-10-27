@@ -1,0 +1,53 @@
+<header class="page-header">
+  <div>
+    <h1>Calendario e risultati</h1>
+    <p>Tutte le giornate con stato della gara, arbitro designato e parziali</p>
+  </div>
+  <div class="actions">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Campionato</mat-label>
+      <mat-select [ngModel]="idCampionato()" (ngModelChange)="seleziona($event)">
+        @for (c of campionati(); track c.id) {
+          <mat-option [value]="c.id">{{ c.nome }} · Girone {{ c.girone }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Squadra</mat-label>
+      <mat-select [ngModel]="filtroSquadra()" (ngModelChange)="filtroSquadra.set($event)">
+        <mat-option [value]="null">Tutte le squadre</mat-option>
+        @for (s of squadre(); track s.id) { <mat-option [value]="s.id">{{ s.nome }}</mat-option> }
+      </mat-select>
+    </mat-form-field>
+  </div>
+</header>
+
+@if (caricamento()) { <mat-progress-bar mode="indeterminate" aria-label="Caricamento calendario" /> }
+
+@if (errore()) {
+  <app-stato-vuoto [errore]="true" titolo="Impossibile caricare il calendario" [testo]="errore()!" />
+} @else if (!caricamento() && giornate().length === 0) {
+  <app-stato-vuoto icona="calendar_month" titolo="Calendario non ancora disponibile"
+                   testo="Il giudice sportivo genererà il calendario alla chiusura delle iscrizioni." />
+} @else {
+  <div class="grid grid-2">
+    @for (g of giornate(); track g.numero) {
+      <section class="card giornata" [attr.aria-labelledby]="'g' + g.numero">
+        <h2 [id]="'g' + g.numero">
+          {{ g.numero }}ª giornata
+          <span class="muted small">{{ g.data | date: 'EEEE d MMMM' }}</span>
+        </h2>
+        @for (p of g.partite; track p.id) {
+          <div class="partita">
+            <app-punteggio [partita]="p" />
+            <div class="meta">
+              <app-stato-chip [stato]="p.stato" />
+              <span class="small muted"><mat-icon inline>schedule</mat-icon> {{ p.dataOra | date: 'HH:mm' }}</span>
+              <span class="small muted"><mat-icon inline>sports</mat-icon> {{ p.arbitro ?? 'Arbitro da designare' }}</span>
+            </div>
+          </div>
+        }
+      </section>
+    }
+  </div>
+}

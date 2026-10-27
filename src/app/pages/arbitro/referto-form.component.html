@@ -1,0 +1,108 @@
+<header class="page-header">
+  <div>
+    <a mat-button routerLink="/arbitro/designazioni"><mat-icon>arrow_back</mat-icon> Designazioni</a>
+    <h1>Referto digitale</h1>
+    @if (referto(); as r) { <p>{{ r.partita.campionato }} · {{ r.partita.giornata }}ª giornata</p> }
+  </div>
+</header>
+
+@if (!referto()) { <mat-progress-bar mode="indeterminate" aria-label="Caricamento" /> }
+@else {
+  @let r = referto()!;
+  @if (r.partita.noteGiudice) {
+    <div class="errori-box"><strong>Referto respinto dal giudice sportivo:</strong> {{ r.partita.noteGiudice }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="invia()">
+    <section class="card tabellone" aria-label="Risultato">
+      <div class="sq">{{ r.partita.casa.nome }}</div>
+      <div class="ris" aria-live="polite">{{ risultato().casa }} – {{ risultato().ospite }}</div>
+      <div class="sq right">{{ r.partita.ospite.nome }}</div>
+    </section>
+
+    <section class="card" aria-labelledby="t-set">
+      <div class="row"><h2 id="t-set">Parziali</h2><span class="spacer"></span>
+        <span class="muted small">Set 1-4 a 25 punti, tie-break a 15, sempre con 2 punti di scarto</span></div>
+      <div formArrayName="set" class="set-list">
+        @for (g of setArray.controls; track $index; let i = $index) {
+          <div class="set-row" [formGroupName]="i" [class.ko]="erroriSet()[i] && g.dirty" [class.ok]="!erroriSet()[i]">
+            <div class="set-label">{{ i === 4 ? 'Tie-break' : (i + 1) + '° set' }}</div>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="pt"><mat-label>{{ r.partita.casa.nome }}</mat-label>
+              <input matInput type="number" min="0" formControlName="puntiCasa" required></mat-form-field>
+            <span class="dash" aria-hidden="true">–</span>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="pt"><mat-label>{{ r.partita.ospite.nome }}</mat-label>
+              <input matInput type="number" min="0" formControlName="puntiOspite" required></mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cambi"><mat-label>Cambi casa</mat-label>
+              <input matInput type="number" min="0" max="6" formControlName="cambiCasa"></mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cambi"><mat-label>Cambi ospite</mat-label>
+              <input matInput type="number" min="0" max="6" formControlName="cambiOspite"></mat-form-field>
+            <div class="esito-set" role="status">
+              @if (erroriSet()[i]) { @if (g.dirty) { <span class="err"><mat-icon inline>error</mat-icon> {{ erroriSet()[i] }}</span> } }
+              @else { <mat-icon class="okicon" aria-label="Set regolare">check_circle</mat-icon> }
+            </div>
+          </div>
+        }
+      </div>
+      <div class="row set-actions">
+        <button mat-stroked-button type="button" (click)="aggiungiSet()" [disabled]="setArray.length >= 5"><mat-icon>add</mat-icon> Aggiungi set</button>
+        <button mat-button type="button" (click)="rimuoviSet()" [disabled]="setArray.length <= 3"><mat-icon>remove</mat-icon> Rimuovi ultimo</button>
+        <span class="spacer"></span>
+        @if (risultato().errore && setArray.dirty) { <span class="warn small"><mat-icon inline>info</mat-icon> {{ risultato().errore }}</span> }
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="t-stat">
+      <h2 id="t-stat">Statistiche e sanzioni</h2>
+      <p class="muted small">Seleziona "In campo" per gli atleti che hanno giocato: concorrono a presenze e statistiche stagionali.</p>
+      <div formArrayName="statistiche">
+        @for (gr of righe(); track gr.idSquadra) {
+          <h3>{{ gr.squadra }}</h3>
+          <div class="table-scroll">
+            <table class="stat">
+              <thead><tr><th scope="col">In campo</th><th scope="col">Atleta</th><th scope="col">Punti</th><th scope="col">Ace</th><th scope="col">Muri</th><th scope="col">Errori</th><th scope="col">Sanzione</th></tr></thead>
+              <tbody>
+                @for (a of gr.atleti; track a.t.id) {
+                  <tr [formGroupName]="a.idx">
+                    <td><mat-checkbox formControlName="inCampo" [aria-label]="'In campo ' + a.t.cognome" /></td>
+                    <td><span class="n">{{ a.t.numeroMaglia }}</span> {{ a.t.cognome }} {{ a.t.nome }} @if (a.t.ruoloCampo === 'LIBERO') { <span class="chip-ruolo">L</span> }</td>
+                    <td><input class="mini" type="number" min="0" formControlName="puntiFatti" (input)="segnaInCampo(a.idx)" [attr.aria-label]="'Punti ' + a.t.cognome"></td>
+                    <td><input class="mini" type="number" min="0" formControlName="ace" (input)="segnaInCampo(a.idx)" [attr.aria-label]="'Ace ' + a.t.cognome"></td>
+                    <td><input class="mini" type="number" min="0" formControlName="muri" (input)="segnaInCampo(a.idx)" [attr.aria-label]="'Muri ' + a.t.cognome"></td>
+                    <td><input class="mini" type="number" min="0" formControlName="errori" (input)="segnaInCampo(a.idx)" [attr.aria-label]="'Errori ' + a.t.cognome"></td>
+                    <td>
+                      <select class="sanz" formControlName="cartellino" [attr.aria-label]="'Sanzione ' + a.t.cognome">
+                        @for (s of sanzioni; track s[0]) { <option [value]="s[0]">{{ s[1] }}</option> }
+                      </select>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+      <mat-form-field appearance="outline" class="full note"><mat-label>Note dell'arbitro</mat-label>
+        <textarea matInput rows="2" formControlName="note" maxlength="1000" placeholder="Eventuali osservazioni sulla gara"></textarea>
+      </mat-form-field>
+    </section>
+
+    <section class="card firma" aria-labelledby="t-firma">
+      <h2 id="t-firma"><mat-icon aria-hidden="true">draw</mat-icon> Firma digitale</h2>
+      <mat-checkbox formControlName="conferma">Dichiaro che i dati inseriti corrispondono allo svolgimento della gara</mat-checkbox>
+      <div class="row">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="pwd"><mat-label>Password di firma</mat-label>
+          <input matInput type="password" formControlName="passwordFirma" autocomplete="current-password" required>
+        </mat-form-field>
+        <button mat-flat-button type="submit" [disabled]="invio() || !refertoValido() || form.invalid">
+          <mat-icon>send</mat-icon> Firma e invia al giudice
+        </button>
+      </div>
+      @if (erroriServer().length) {
+        <div class="errori-box" role="alert"><strong>Referto non accettato</strong>
+          <ul>@for (e of erroriServer(); track e) { <li>{{ e }}</li> }</ul>
+          <div class="small">Nessun dato è stato salvato: la transazione è stata annullata.</div>
+        </div>
+      }
+    </section>
+  </form>
+}

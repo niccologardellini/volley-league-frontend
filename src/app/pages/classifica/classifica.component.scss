@@ -1,0 +1,19 @@
+.sel { min-width: 320px; }
+.toolbar-crit { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.pos {
+  display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 8px;
+  background: var(--sfondo); font-weight: 700;
+}
+.pos.top { background: var(--primario); color: #fff; }
+.sq { font-weight: 600; }
+.pt { font-weight: 800; font-size: 1.05rem; color: var(--primario); }
+abbr { text-decoration: none; cursor: help; }
+.ris { display: flex; gap: 4px; }
+.ris span {
+  min-width: 22px; text-align: center; border-radius: 6px; font-size: .75rem; padding: 2px 0;
+  background: #fde8e6; color: #8c1d18; font-variant-numeric: tabular-nums;
+}
+.ris span.vinto { background: #dcf5e6; color: #116336; }
+tr.mia { background: #fff7eb; }
+.legenda { margin-top: 10px; }
+@media (max-width: 600px) { .sel { min-width: 0; width: 100%; } }

@@ -1,0 +1,16 @@
+.layout { display: grid; grid-template-columns: 1fr 340px; gap: 16px; align-items: start; }
+.gruppo { border: none; padding: 0; margin: 0 0 14px; }
+.gruppo legend { font-size: .72rem; font-weight: 700; color: var(--testo-sec); letter-spacing: .6px; margin-bottom: 6px; }
+.atleti { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px; }
+.atleta { border: 1px solid var(--bordo); border-radius: 10px; padding-right: 10px; }
+.atleta.sel { background: #e8f0ff; border-color: #c7d8ff; }
+.n { display: inline-block; min-width: 24px; font-weight: 800; color: var(--primario); }
+.riepilogo { position: sticky; top: 84px; }
+.contatori { display: flex; gap: 24px; margin-bottom: 8px; }
+.contatori .v { font-size: 2rem; font-weight: 800; color: var(--primario); }
+.contatori .l { color: var(--testo-sec); margin-left: 4px; }
+.contatori .ko .v { color: #b3261e; }
+.avvisi { list-style: none; padding: 0; margin: 0 0 12px; color: #8a5300; font-size: .9rem; display: grid; gap: 4px; }
+.ok { color: #116336; font-weight: 600; }
+h3 { font-size: .95rem; margin: 14px 0 8px; }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .riepilogo { position: static; } }
