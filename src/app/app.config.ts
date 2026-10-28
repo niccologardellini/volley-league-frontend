@@ -11,6 +11,7 @@ import { authInterceptor } from './core/auth.interceptor';
 
 registerLocaleData(localeIt);
 
+/** Configurazione globale: rotte, client HTTP con interceptor JWT, animazioni e localizzazione italiana. */
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
